@@ -10,9 +10,10 @@ const config = argv[2]
   : require('../config.json');
 
 assert(config.savePath, 'config.savePath is required');
-assert(config.url, 'config.url is required');
+const urls = config.urls || (config.url ? [config.url] : []);
+assert(urls.length, 'config.urls is required');
 
-const ext = config.ext ?? config.url.match(/\.(\w+)$/)?.[1] ?? 'noext';
+const ext = config.ext ?? urls[0].match(/\.(\w+)$/)?.[1] ?? 'noext';
 
 const headers = config.headers ?? {};
 const maxZoom = config.maxZoom ?? 18;
@@ -62,8 +63,8 @@ function saveUrlToFile(url, fileName) {
     })
 }
 
-function getUrl(indexs){
-  return config.url
+function getUrl(templateUrl, indexs){
+  return templateUrl
     .replace(/\{z\}/g, indexs[0] + offset.z)
     .replace(/\{x\}/g, indexs[1] + offset.x)
     .replace(/\{y\}/g, indexs[2] + offset.y);
@@ -75,7 +76,7 @@ const downloadIndexsQueue = [[0,0,0]];
   while(true) {
     const indexs = downloadIndexsQueue.shift();
     if (!indexs) {
-      console.log('download finished');
+      console.log('download finished!');
       break;
     }
 
@@ -89,11 +90,17 @@ const downloadIndexsQueue = [[0,0,0]];
         );
 
         if(!fs.existsSync(fileName) && (!withUnreachableList || !unreachableListDict[indexs.join('/')])) {
-          console.log(`downloading ${indexs[0]},${indexs[1]},${indexs[2]}`);
-          const url = getUrl(indexs);
-          await saveUrlToFile(url, fileName);
+          console.log(`- downloading ${indexs[0]},${indexs[1]},${indexs[2]}`);
+          
+          await Promise.race(urls.map((templateUrl)=>{
+            const url = getUrl(templateUrl, indexs);
+            return saveUrlToFile(url, fileName)
+          }))
+
+          console.log('[ + ] downloaded')
+
         }else{
-          console.log(`exists or unreach ${indexs[0]},${indexs[1]},${indexs[2]}`);
+          console.log(`[e|u] ${indexs[0]},${indexs[1]},${indexs[2]}`);
         }
       }
     
@@ -111,8 +118,8 @@ const downloadIndexsQueue = [[0,0,0]];
         }
       }
     } catch (error) {
-      console.log(`error downloading ${indexs[0]},${indexs[1]},${indexs[2]}`);
-      console.log(error.message);
+      console.log(`[ e ] downloading ${indexs[0]},${indexs[1]},${indexs[2]}`);
+      // console.log(error.message);
       
       fs.appendFileSync(
         unreachableListFile,
