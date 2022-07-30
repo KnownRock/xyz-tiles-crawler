@@ -92,7 +92,7 @@ const downloadIndexsQueue = [[0,0,0]];
         if(!fs.existsSync(fileName) && (!withUnreachableList || !unreachableListDict[indexs.join('/')])) {
           console.log(`- downloading ${indexs[0]},${indexs[1]},${indexs[2]}`);
           
-          await Promise.race(urls.map((templateUrl)=>{
+          await Promise.any(urls.map((templateUrl)=>{
             const url = getUrl(templateUrl, indexs);
             return saveUrlToFile(url, fileName)
           }))
