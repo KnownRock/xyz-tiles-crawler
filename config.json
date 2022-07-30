@@ -1,0 +1,12 @@
+{
+  "url": "https://target-url/{z}/{x}/{y}.sg",
+  "savePath": "./data/save2",
+  "unreachableListFile": "./data/save2.unreachable.txt",
+  "maxZoom": 15,
+  "minZoom": 0,
+  "withUnreachableList": true,
+
+  "headers":{
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+  }
+}
