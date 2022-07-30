@@ -103,7 +103,7 @@ const downloadIndexsQueue = [[0,0,0]];
         const nextZIndex = indexs[0] + 1;
         const nextXIndex = indexs[1] * 2;
         const nextYIndex = indexs[2] * 2;
-        if(nextZIndex < maxZoom) {
+        if(nextZIndex <= maxZoom) {
           downloadIndexsQueue.push([nextZIndex, nextXIndex,     nextYIndex]);
           downloadIndexsQueue.push([nextZIndex, nextXIndex + 1, nextYIndex]);
           downloadIndexsQueue.push([nextZIndex, nextXIndex,     nextYIndex + 1]);
